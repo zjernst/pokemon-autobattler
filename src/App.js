@@ -10,12 +10,25 @@ const TIER_ONE = ["bulbasaur", "charmander", "squirtle", "caterpie", "weedle", "
 function App() {
   const [pokemon, setPokemon] = useState(sample(TIER_ONE));
   const {url, w, h, pixelated} = Sprites.getPokemon(pokemon);
+
+  const [turn, setTurn] = useState(1)
+
+  const pokemonList = [];
+  for (let i = 0; i < 3; i++) {
+    const randomPokemon = sample(TIER_ONE);
+    const pokemonData = Sprites.getPokemon(randomPokemon);
+    pokemonList.push(pokemonData);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={url} className="App-logo" alt="logo" />
-      </header>
+      <div className="shop-container">
+        {pokemonList.map((pokemon, index) => (
+            <img key={index} src={pokemon.url} className="App-logo" alt="logo" />
+          ))}
+      </div>
       <RerollButton onReroll={() => setPokemon(sample(TIER_ONE))} />
+      <button className="endturn-button" onClick={() => setTurn(turn + 1)}>End Turn</button>
     </div>
   );
 }

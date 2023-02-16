@@ -1,7 +1,9 @@
 body {
-  background-image: url('https://www.serebii.net/pokearth/maps/kanto-frlg/29.png');
-  background-size: cover;
+  background-image: url('../fx/bg-forest.png');
+  background-repeat: no-repeat;
   margin: 0;
+  width: 753px;
+  height: 500px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
