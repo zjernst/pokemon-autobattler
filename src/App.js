@@ -23,9 +23,28 @@ function App() {
   return (
     <div className="App">
       <div className="shop-container">
-        {pokemonList.map((pokemon, index) => (
-            <img key={index} src={pokemon.url} className="App-logo" alt="logo" />
-          ))}
+        <div className="shop-pokemon-container">
+          {pokemonList.map((pokemon, index) => (
+              <img
+                key={index}
+                src={pokemon.url}
+                className="shop-pokemon"
+                alt="logo"
+                draggable
+                onDragStart={(e) => console.log(e)}
+              />
+            ))}
+        </div>
+      </div>
+      <div className="player-side-container">
+        <div className="team-slots-container">
+          <div className="team-slot"></div>
+          <div className="team-slot"></div>
+          <div className="team-slot"></div>
+          <div className="team-slot"></div>
+          <div className="team-slot"></div>
+          <div className="team-slot"></div>
+        </div>
       </div>
       <RerollButton onReroll={() => setPokemon(sample(TIER_ONE))} />
       <button className="endturn-button" onClick={() => setTurn(turn + 1)}>End Turn</button>
