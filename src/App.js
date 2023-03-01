@@ -9,10 +9,15 @@ import RerollButton from './RerollButton';
 const TIER_ONE = ["bulbasaur", "charmander", "squirtle", "caterpie", "weedle", "pidgey", "rattata", "spearow", "ekans", "pikachu"]
 
 function App() {
-  const [pokemon, setPokemon] = useState(sample(TIER_ONE));
-  const {url, w, h, pixelated} = Sprites.getPokemon(pokemon);
+  // const [pokemon, setPokemon] = useState(sample(TIER_ONE));
+  const [shop, setShop] = useState([]);
+  const [team, setTeam] = useState([]);
+  // const {url, w, h, pixelated} = Sprites.getPokemon(pokemon);
+
 
   const [turn, setTurn] = useState(1)
+
+  const [draggingIndex, setDraggingIndex] = useState(0)
 
   const pokemonList = [];
   for (let i = 0; i < 3; i++) {
@@ -20,6 +25,7 @@ function App() {
     const pokemonData = Sprites.getPokemon(randomPokemon);
     pokemonData["id"] = uniqueId(randomPokemon)
     pokemonList.push(pokemonData);
+    setShop(pokemonList)
   }
 
   const onDragEnd = (result) => {
@@ -35,16 +41,26 @@ function App() {
 
   const onDragStart = (e) => {
     console.log("start", e)
+    setDraggingIndex(e.source.index)
+  }
+
+  const onBeforeCapture = (e) => {
+    console.log("setting drag", e)
+    // setDraggingIndex(e.source.index)
+  }
+
+  const onBeforeDragStart = (e) => {
+    console.log(e)
   }
 
   return (
     <div className="App">
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart} onBeforeCapture={onBeforeCapture} onBeforeDragStart={onBeforeDragStart}>
         <div className="shop-container">
           <Droppable droppableId="pokeshop" direction="horizontal">
             {(provided, snapshot) => (
               <div ref={provided.innerRef} className="shop-pokemon-container" {...provided.droppableProps}>
-                {pokemonList.map((pokemon, index) => (
+                {shop.map((pokemon, index) => (
                   <Draggable key={`shop-${pokemon.id}`} draggableId={`shop-${pokemon.id}`} index={index}>
                     {(provided, snapshot) => (
                       <img
@@ -54,11 +70,11 @@ function App() {
                         alt="logo"
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        draggable
                       />
                     )}
                   </Draggable>
                 ))}
+                {provided.placeholder}
               </div>
             )}
           </Droppable>
@@ -71,6 +87,7 @@ function App() {
                   <Droppable key={i} droppableId={`slot-${i}`}>
                     {(provided, snapshot) => (
                       <div ref={provided.innerRef} key={i} className="team-slot" {...provided.droppableProps}>
+                        {provided.placeholder}
                       </div>
                     )}
                   </Droppable>
