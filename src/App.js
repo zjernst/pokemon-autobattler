@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 import {Sprites, Icons} from '@pkmn/img';
 import {sample, times, uniqueId} from 'lodash';
@@ -8,12 +8,7 @@ import RerollButton from './RerollButton';
 
 const TIER_ONE = ["bulbasaur", "charmander", "squirtle", "caterpie", "weedle", "pidgey", "rattata", "spearow", "ekans", "pikachu"]
 
-function App() {
-  const [pokemon, setPokemon] = useState(sample(TIER_ONE));
-  const {url, w, h, pixelated} = Sprites.getPokemon(pokemon);
-
-  const [turn, setTurn] = useState(1)
-
+const rerollShop = () => {
   const pokemonList = [];
   for (let i = 0; i < 3; i++) {
     const randomPokemon = sample(TIER_ONE);
@@ -21,67 +16,75 @@ function App() {
     pokemonData["id"] = uniqueId(randomPokemon)
     pokemonList.push(pokemonData);
   }
+  return pokemonList
+}
 
-  const onDragEnd = (result) => {
-    console.log("dragend", result);
-    if (!result.destination) return;
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-    const item = pokemonList[sourceIndex];
-    const newList = [...pokemonList];
-    newList.splice(sourceIndex, 1);
-    newList.splice(destinationIndex, 0, item);
+function App() {
+  const [shop, setShop] = useState(() => rerollShop());
+  const [team, setTeam] = useState([]);
+  const [selectedPokemon, setSelectedPokemon] = useState(null)
+
+  const [turn, setTurn] = useState(1)
+  const deselectPokemonRef = useRef(null);
+  const handleShopClick = (pokemon) => {
+    setSelectedPokemon(pokemon)
   }
 
-  const onDragStart = (e) => {
-    console.log("start", e)
+  const handleTeamSlotClick = (pokemon) => {
+    if (selectedPokemon) {
+      setShop((prevShop) => prevShop.filter((poke) => poke.id === selectedPokemon.id));
+      setTeam((prevTeam) => [...prevTeam, selectedPokemon])
+      setSelectedPokemon(null)
+    }
   }
+
+  // const handleDocumentClick = (event) => {
+  //   if (deselectPokemonRef.current && !deselectPokemonRef.contains(event.target)) {
+  //     setSelectedPokemon(null)
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   document.addEventListener("click", handleDocumentClick);
+
+  //   return () => {
+  //     document.removeEventListener("click", handleDocumentClick)
+  //   }
+  // }, []);
 
   return (
     <div className="App">
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
         <div className="shop-container">
-          <Droppable droppableId="pokeshop" direction="horizontal">
-            {(provided, snapshot) => (
-              <div ref={provided.innerRef} className="shop-pokemon-container" {...provided.droppableProps}>
-                {pokemonList.map((pokemon, index) => (
-                  <Draggable key={`shop-${pokemon.id}`} draggableId={`shop-${pokemon.id}`} index={index}>
-                    {(provided, snapshot) => (
-                      <img
-                        ref={provided.innerRef}
-                        src={pokemon.url}
-                        className="shop-pokemon"
-                        alt="logo"
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        draggable
-                      />
-                    )}
-                  </Draggable>
-                ))}
-              </div>
+          <div className="shop-pokemon-container">
+            {shop.map((pokemon, index) => (
+              <img
+                key={`${pokemon.id}`}
+                src={pokemon.url}
+                className={`shop-pokemon ${selectedPokemon && selectedPokemon.id === pokemon.id ? 'selected' : ''}`}
+                alt="logo"
+                onClick={() => handleShopClick(pokemon)}
+              />
+            ))}
+            {selectedPokemon && (
+              <div ref={deselectPokemonRef} className="deselect-pokemon" />
             )}
-          </Droppable>
+          </div>
         </div>
         <div className="player-side-container">
           <div className="team-slots-container">
             {
               times(6, (i) => {
                 return (
-                  <Droppable key={i} droppableId={`slot-${i}`}>
-                    {(provided, snapshot) => (
-                      <div ref={provided.innerRef} key={i} className="team-slot" {...provided.droppableProps}>
-                      </div>
-                    )}
-                  </Droppable>
+                  <div key={i} className="team-slot" onClick={() => handleTeamSlotClick(i)}>
+                    {team[i] && <img src={team[i].url} className="team-pokemon" />}
+                  </div>
                 )
               })
             }
           </div>
         </div>
-        <RerollButton onReroll={() => setPokemon(sample(TIER_ONE))} />
+        <RerollButton onReroll={() => setShop(rerollShop())} />
         <button className="endturn-button" onClick={() => setTurn(turn + 1)}>End Turn</button>
-      </DragDropContext>
     </div>
   );
 }
